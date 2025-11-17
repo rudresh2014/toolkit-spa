@@ -1,11 +1,12 @@
 self.addEventListener("install", (event) => {
-  console.log("Service Worker installed");
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker activated");
   clients.claim();
 });
 
-self.addEventListener("fetch", () => {});
+// REQUIRED for PWA install prompt
+self.addEventListener("fetch", (event) => {
+  return; // minimal handler
+});

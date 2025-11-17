@@ -5,27 +5,12 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="theme-color" content="#0b1020" />
 
-  <!-- PWA manifest -->
-  <link rel="manifest" href="/manifest.json">
-
-  <!-- App title -->
   <title>Toolkit — To-Do & Expense</title>
 
-  <!-- Styles -->
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="/style.css" />
 
-  <!-- Register Service Worker -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/service-worker.js")
-          .catch(console.error);
-      });
-    }
-  </script>
-
-  <!-- Supabase session redirect -->
+  <!-- Supabase session redirect (no service worker / no manifest) -->
   <script type="module">
     import { supabase } from "/supabaseClient.js";
 
@@ -43,18 +28,18 @@
 
     <!-- HOME SCREEN -->
     <section id="home" class="home-screen">
-      <div class="glass-wrapper" role="region" aria-label="Personal hub overview">
+      <div class="glass-wrapper" role="region">
 
         <!-- Greeting + Clock -->
         <div class="top-row">
           <div class="greeting-col">
-            <div id="greeting" class="greeting" aria-live="polite">Good Evening</div>
-            <div id="username" class="username" aria-live="polite">Loading…</div>
+            <div id="greeting" class="greeting">Good Evening</div>
+            <div id="username" class="username">Loading…</div>
           </div>
 
           <div class="clock-col">
-            <div id="dateDisplay" class="date-display" aria-live="polite">—</div>
-            <div id="timeDisplay" class="time-display" aria-live="polite">—</div>
+            <div id="dateDisplay" class="date-display">—</div>
+            <div id="timeDisplay" class="time-display">—</div>
           </div>
         </div>
 
@@ -66,16 +51,9 @@
         <!-- Notes + Activity -->
         <div class="controls-row">
 
-          <div class="notes" role="region">
+          <div class="notes">
             <h3>Quick Notes</h3>
-
-            <textarea
-              id="notesInput"
-              class="notes-input"
-              rows="3"
-              placeholder="Write something..."
-              aria-describedby="notesCount"
-            ></textarea>
+            <textarea id="notesInput" class="notes-input" rows="3" placeholder="Write something..."></textarea>
 
             <div class="notes-actions">
               <button id="notesClear" class="btn small">Clear</button>
@@ -83,12 +61,11 @@
             </div>
           </div>
 
-          <div class="activity" role="region">
+          <div class="activity">
             <div class="activity-header">
               <h3>Recent Activity</h3>
               <button id="activityClear" class="btn small">Clear</button>
             </div>
-
             <div id="activityFeed" class="activity-feed"></div>
           </div>
 
@@ -123,7 +100,7 @@
       </div>
     </section>
 
-    <!-- Embedded App View -->
+    <!-- APP VIEW -->
     <section id="app-view" class="app-view hidden">
       <iframe id="app-frame" class="app-frame"></iframe>
       <button id="backBtn" class="back-btn">← Back</button>

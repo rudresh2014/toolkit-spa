@@ -1,12 +1,11 @@
-self.addEventListener("install", (event) => {
+self.addEventListener("install", (e) => {
   self.skipWaiting();
 });
 
-self.addEventListener("activate", (event) => {
-  clients.claim();
+self.addEventListener("activate", (e) => {
+  console.log("Service worker active");
 });
 
-// REQUIRED for PWA install prompt
 self.addEventListener("fetch", (event) => {
-  return; // minimal handler
+  // Allow normal network fetch
 });

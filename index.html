@@ -8,24 +8,26 @@
   <!-- PWA manifest -->
   <link rel="manifest" href="/manifest.json">
 
+  <!-- App title -->
   <title>Toolkit — To-Do & Expense</title>
 
-  <link rel="stylesheet" href="style.css" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="/style.css" />
 
-  <!-- Register Service Worker (Correct Way) -->
+  <!-- Register Service Worker -->
   <script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("/service-worker.js", { scope: "/" })
-        .catch(console.error);
-    });
-  }
-</script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .catch(console.error);
+      });
+    }
+  </script>
 
   <!-- Supabase session redirect -->
   <script type="module">
-    import { supabase } from "./supabaseClient.js";
+    import { supabase } from "/supabaseClient.js";
 
     const { data } = await supabase.auth.getSession();
     if (!data.session) {
@@ -33,6 +35,7 @@
     }
   </script>
 </head>
+
 <body>
   <canvas id="particle-canvas" class="particle-canvas"></canvas>
 
@@ -63,46 +66,48 @@
         <!-- Notes + Activity -->
         <div class="controls-row">
 
-          <div class="notes" role="region" aria-labelledby="notesHeading">
-            <h3 id="notesHeading">Quick Notes</h3>
+          <div class="notes" role="region">
+            <h3>Quick Notes</h3>
+
             <textarea
               id="notesInput"
               class="notes-input"
               rows="3"
               placeholder="Write something..."
               aria-describedby="notesCount"
-              aria-label="Personal notes input"
             ></textarea>
+
             <div class="notes-actions">
-              <button id="notesClear" class="btn small" type="button">Clear</button>
-              <span id="notesCount" aria-live="polite">0 characters</span>
+              <button id="notesClear" class="btn small">Clear</button>
+              <span id="notesCount">0 characters</span>
             </div>
           </div>
 
-          <div class="activity" role="region" aria-labelledby="activityHeading">
+          <div class="activity" role="region">
             <div class="activity-header">
-              <h3 id="activityHeading">Recent Activity</h3>
-              <button id="activityClear" class="btn small" type="button">Clear</button>
+              <h3>Recent Activity</h3>
+              <button id="activityClear" class="btn small">Clear</button>
             </div>
-            <div id="activityFeed" class="activity-feed" aria-live="polite"></div>
+
+            <div id="activityFeed" class="activity-feed"></div>
           </div>
 
         </div>
 
-        <!-- App Tiles -->
+        <!-- Tiles -->
         <div class="tiles premium-grid">
 
-          <button class="tile glass-tile" data-app="todo" type="button" aria-label="Open To-Do App" title="Open To-Do App">
+          <button class="tile glass-tile" data-app="todo">
             <div class="tile-inner">
-              <div class="tile-icon" aria-hidden="true">📝</div>
+              <div class="tile-icon">📝</div>
               <div class="tile-title">To-Do App</div>
               <div class="tile-desc">Organize tasks</div>
             </div>
           </button>
 
-          <button class="tile glass-tile" data-app="expense" type="button" aria-label="Open Expense Tracker" title="Open Expense Tracker">
+          <button class="tile glass-tile" data-app="expense">
             <div class="tile-inner">
-              <div class="tile-icon" aria-hidden="true">💰</div>
+              <div class="tile-icon">💰</div>
               <div class="tile-title">Expense Tracker</div>
               <div class="tile-desc">Track spending</div>
             </div>
@@ -111,24 +116,25 @@
         </div>
 
         <footer class="home-foot">
-          <small aria-label="Attribution">✨ Made by Rudresh ✨</small>
-          <button id="logoutBtn" class="btn tiny" type="button">Logout</button>
+          <small>✨ Made by Rudresh ✨</small>
+          <button id="logoutBtn" class="btn tiny">Logout</button>
         </footer>
 
       </div>
     </section>
 
-    <!-- FULL APP VIEW -->
+    <!-- Embedded App View -->
     <section id="app-view" class="app-view hidden">
       <iframe id="app-frame" class="app-frame"></iframe>
-      <button id="backBtn" class="back-btn" type="button" aria-label="Back to dashboard">← Back</button>
+      <button id="backBtn" class="back-btn">← Back</button>
     </section>
 
-    <div id="loader" class="loader hidden" role="status" aria-live="assertive">Loading…</div>
+    <div id="loader" class="loader hidden">Loading…</div>
 
   </main>
 
-  <script type="module" src="home.js"></script>
-  <script type="module" src="router.js"></script>
+  <script type="module" src="/home.js"></script>
+  <script type="module" src="/router.js"></script>
+
 </body>
 </html>

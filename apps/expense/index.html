@@ -24,33 +24,33 @@
 
     <section class="expense-grid">
       <div class="control-stack" role="search">
-        <label for="searchInput">Search ledger</label>
+        <label for="searchInput">🔍 Search ledger</label>
         <div class="input-shell">
           <input id="searchInput" placeholder="Search expenses..." aria-label="Search expenses" />
         </div>
       </div>
       <div class="control-stack">
-        <label for="categoryFilter">Filter category</label>
+        <label for="categoryFilter">🗂 Filter category</label>
         <div class="input-shell select-shell">
           <select id="categoryFilter" aria-label="Filter by category">
-            <option value="all">All</option>
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Shopping</option>
-            <option>Other</option>
+            <option value="all">All 🧩</option>
+            <option>🍔 Food</option>
+            <option>✈️ Transport</option>
+            <option>🛍 Shopping</option>
+            <option>📋 Other</option>
           </select>
         </div>
       </div>
       <div class="composer-card" aria-label="Add expense form">
-        <label>Log spend</label>
+        <label>💸 Log spend</label>
         <div class="composer-grid">
           <input id="title" placeholder="Title" aria-label="Expense title" />
           <input id="amount" type="number" placeholder="Amount" aria-label="Expense amount" inputmode="decimal" />
           <select id="category" aria-label="Expense category">
-            <option>Food</option>
-            <option>Transport</option>
-            <option>Shopping</option>
-            <option>Other</option>
+            <option>🍔 Food</option>
+            <option>✈️ Transport</option>
+            <option>🛍 Shopping</option>
+            <option>📋 Other</option>
           </select>
           <button id="addBtn" type="button">Add</button>
         </div>
@@ -59,11 +59,11 @@
 
     <section class="metrics-panel" aria-label="Expense metrics">
       <article class="metric-card">
-        <p>Total spend</p>
+        <p>💸 Total spend</p>
         <span id="totalExp" aria-live="polite">0</span>
       </article>
       <article class="metric-card">
-        <p>Entries</p>
+        <p>📂 Entries</p>
         <span id="expenseCount" aria-live="polite">0</span>
       </article>
     </section>

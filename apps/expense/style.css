@@ -170,8 +170,7 @@ body {
   gap: 12px;
 }
 
-.composer-grid input,
-.composer-grid select {
+.composer-grid input,.composer-grid select { -webkit-appearance: none; appearance: none;
   padding: 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border-subtle);
@@ -184,6 +183,37 @@ body {
 .composer-grid select:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(121, 246, 255, 0.3);
+}
+
+.composer-grid select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 32px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(200,200,255,0.7)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.composer-grid select option {
+  background: rgba(30, 30, 50, 0.95);
+  color: var(--color-strong);
+  padding: 8px 12px;
+  border: 1px solid rgba(124, 122, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+/* Cross-browser tweaks */
+.composer-grid select::-ms-expand { display: none; }
+.composer-grid select:focus {
+  outline: none;
+  box-shadow: 0 12px 40px rgba(124,122,255,0.12);
+  transform: translateY(-1px);
+}
+.composer-grid select option {
+  background: rgba(20,20,36,0.98);
+  color: var(--color-strong);
 }
 
 .composer-grid button {
@@ -432,6 +462,7 @@ button:focus-visible {
     transform: translateX(100px) scale(0.8);
   }
 }
+
 
 
 

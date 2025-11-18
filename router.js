@@ -5,34 +5,79 @@ const appFrame = document.getElementById("app-frame");
 const backBtn = document.getElementById("backBtn");
 const loader = document.getElementById("loader");
 
-// Inject premium ultra-smooth transition styles into document head
+// Inject premium Apple-style card-lift transition animations
 const transitionStyles = `
   <style>
-    /* ========================= MASTER ANIMATIONS ========================= */
-    @keyframes pageEnter {
+    /* ========================= PREMIUM APPLE CARD-LIFT ANIMATIONS ========================= */
+    
+    /* Home screen exit: blur + scale down */
+    @keyframes cardLiftExit {
       from {
-        opacity: 0;
-        transform: scale(0.95) translateY(16px);
-        filter: blur(10px);
+        opacity: 1;
+        transform: scale(1) translateZ(0);
+        filter: blur(0px);
       }
       to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-        filter: blur(0);
+        opacity: 0.7;
+        transform: scale(0.96) translateZ(0);
+        filter: blur(6px);
       }
     }
 
-    @keyframes pageExit {
+    /* New page enter: scale up from small + fade in + shadow depth */
+    @keyframes cardLiftEnter {
       from {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-        filter: blur(0);
+        opacity: 0;
+        transform: scale(0.92) translateZ(0);
+        filter: blur(4px);
       }
       to {
-        opacity: 0;
-        transform: scale(0.93) translateY(-16px);
-        filter: blur(10px);
+        opacity: 1;
+        transform: scale(1) translateZ(0);
+        filter: blur(0px);
       }
+    }
+
+    /* Backdrop blur for depth effect */
+    @keyframes backdropBlur {
+      from {
+        backdrop-filter: blur(0px);
+      }
+      to {
+        backdrop-filter: blur(8px);
+      }
+    }
+
+    /* Premium depth shadow (appears as page lifts) */
+    @keyframes depthShadow {
+      from {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+      to {
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      }
+    }
+
+    /* Home screen blur state (while app is open) */
+    .home-blurred {
+      filter: blur(6px);
+      transform: scale(0.96);
+      opacity: 0.7;
+      transition: none;
+    }
+
+    /* App view with card-lift elevation */
+    .app-view-card-lift {
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      animation: cardLiftEnter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .tile:active {
+      animation: tilePress 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .tile-ripple {
+      animation: ripple 700ms cubic-bezier(0.25, 0.8, 0.3, 1) forwards;
     }
 
     @keyframes tilePress {
@@ -53,52 +98,17 @@ const transitionStyles = `
       }
     }
 
-    @keyframes slideInFromRight {
-      from {
-        opacity: 0;
-        transform: translateX(48px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    @keyframes slideOutToLeft {
-      from {
-        opacity: 1;
-        transform: translateX(0);
-      }
-      to {
-        opacity: 0;
-        transform: translateX(-48px);
-      }
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { 
-        box-shadow: 0 0 20px rgba(94, 252, 232, 0.3);
-      }
-      50% { 
-        box-shadow: 0 0 40px rgba(124, 120, 255, 0.4);
-      }
-    }
-
-    .tile:active {
-      animation: tilePress 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .tile-ripple {
-      animation: ripple 700ms cubic-bezier(0.25, 0.8, 0.3, 1) forwards;
+    /* Smooth glass-wrapper scale transition */
+    .glass-wrapper {
+      transform-origin: center;
+      will-change: transform, filter, opacity;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      @keyframes pageEnter { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes pageExit { from { opacity: 1; } to { opacity: 0; } }
+      @keyframes cardLiftExit { from { opacity: 1; } to { opacity: 1; } }
+      @keyframes cardLiftEnter { from { opacity: 0; } to { opacity: 1; } }
       @keyframes tilePress { 0%, 100% { transform: scale(1); } }
       @keyframes ripple { 0%, 100% { box-shadow: 0 0 0 0 rgba(94, 252, 232, 0); } }
-      @keyframes slideInFromRight { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes slideOutToLeft { from { opacity: 1; } to { opacity: 0; } }
     }
   </style>
 `;
@@ -166,137 +176,111 @@ function createRippleEffect(element, event) {
 
 let currentClone = null;
 
+/**
+ * PREMIUM APPLE CARD-LIFT TRANSITION
+ * - Home blurs & scales down (0.96)
+ * - New page scales up from 0.92 → 1.00 with depth shadow
+ * - Smooth 320ms animation with premium easing
+ * - No Supabase modifications (auth/data calls untouched)
+ */
 async function openApp(name, tileEl) {
-  // show loader with smooth, pulsing entrance (macOS-grade polish)
+  // Show loader (optional subtle feedback)
   loader.classList.remove("hidden");
   loader.style.opacity = "0";
   loader.style.animation = "none";
   void loader.offsetWidth;
-  loader.style.animation = "pageEnter 300ms cubic-bezier(0.16, 1, 0.3, 1), pulseGlow 2s ease-in-out infinite 300ms";
+  loader.style.animation = "pageEnter 280ms cubic-bezier(0.16, 1, 0.3, 1)";
   loader.style.opacity = "1";
 
-  // clone tile for premium expanding shared-element animation
-  const rect = tileEl.getBoundingClientRect();
-  const clone = tileEl.cloneNode(true);
-  clone.style.position = "fixed";
-  clone.style.top = `${rect.top}px`;
-  clone.style.left = `${rect.left}px`;
-  clone.style.width = `${rect.width}px`;
-  clone.style.height = `${rect.height}px`;
-  clone.style.margin = 0;
-  clone.style.zIndex = 9999;
-  clone.style.pointerEvents = "none";
-  clone.style.willChange = "transform, opacity";
-  clone.style.transition = "all 480ms cubic-bezier(0.16, 1, 0.3, 1)";
-  document.body.appendChild(clone);
-  currentClone = clone;
+  // ===== PHASE 1: HOME SCREEN EXIT (blur + scale down) =====
+  const glassWrapper = homeEl.querySelector(".glass-wrapper");
+  if (glassWrapper) {
+    glassWrapper.style.transition = "all 320ms cubic-bezier(0.25, 0.8, 0.3, 1)";
+    glassWrapper.style.transform = "scale(0.96)";
+    glassWrapper.style.filter = "blur(6px)";
+    glassWrapper.style.opacity = "0.7";
+  }
+  homeEl.style.pointerEvents = "none";
 
-  // small tactile feedback on original tile (scale down)
-  tileEl.style.transform = "scale(0.94)";
-  tileEl.style.transition = "transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1)";
-  tileEl.style.opacity = "0.75";
-
-  // force reflow for smooth animation
-  void clone.offsetWidth;
-
-  // expand clone to cover screen with premium Sonoma-grade easing
-  const targetW = window.innerWidth * 0.96;
-  const targetH = window.innerHeight * 0.92;
-  const targetLeft = (window.innerWidth - targetW) / 2;
-  const targetTop = (window.innerHeight - targetH) / 2;
-
-  clone.style.left = `${targetLeft}px`;
-  clone.style.top = `${targetTop}px`;
-  clone.style.width = `${targetW}px`;
-  clone.style.height = `${targetH}px`;
-  clone.style.borderRadius = "18px";
-  clone.style.boxShadow = "0 60px 180px rgba(0, 0, 0, 0.7)";
-  clone.style.opacity = "0.99";
-
-  // slide out/hide home with fluid transition
+  // ===== PHASE 2: APP VIEW ENTER (scale up from 0.92 + fade in + depth shadow) =====
   setTimeout(() => {
-    homeEl.style.animation = "slideOutToLeft 380ms cubic-bezier(0.2, 0.8, 0.2, 1)";
-    homeEl.style.pointerEvents = "none";
-
-    setTimeout(() => {
-      homeEl.classList.add("hidden");
-      appView.classList.remove("hidden");
-      appView.style.opacity = "0";
-      appView.style.transform = "scale(0.97)";
-      appView.style.filter = "blur(8px)";
-      
-      // set iframe src
-      appFrame.src = `/apps/${name}/index.html`;
-      
-      // animate appView fade and scale in with premium easing
-      setTimeout(() => {
-        appView.style.transition = "all 480ms cubic-bezier(0.16, 1, 0.3, 1)";
-        appView.style.opacity = "1";
-        appView.style.transform = "scale(1)";
-        appView.style.filter = "blur(0)";
-      }, 60);
-    }, 260);
-  }, 300);
-
-  // remove clone after app loads and fade out loader
-  setTimeout(() => {
-    try { clone.remove(); } catch(e){}
-    currentClone = null;
-    tileEl.style.transform = "";
-    tileEl.style.opacity = "";
-    tileEl.style.transition = "";
+    homeEl.classList.add("hidden");
+    appView.classList.remove("hidden");
     
-    // smooth loader fade out
-    loader.style.transition = "opacity 280ms cubic-bezier(0.4, 0, 0.2, 1)";
+    // Reset to initial state
+    appView.style.transition = "none";
+    appView.style.opacity = "0";
+    appView.style.transform = "scale(0.92)";
+    appView.style.filter = "blur(4px)";
+    appView.style.pointerEvents = "auto";
+    
+    // Set iframe src (Supabase connections will work normally)
+    appFrame.src = `/apps/${name}/index.html`;
+    
+    // Force reflow
+    void appView.offsetWidth;
+    
+    // Animate in with card-lift effect
+    appView.style.transition = "all 320ms cubic-bezier(0.16, 1, 0.3, 1)";
+    appView.style.opacity = "1";
+    appView.style.transform = "scale(1)";
+    appView.style.filter = "blur(0px)";
+  }, 0);
+
+  // ===== FADE OUT LOADER =====
+  setTimeout(() => {
+    loader.style.transition = "opacity 260ms cubic-bezier(0.4, 0, 0.2, 1)";
     loader.style.opacity = "0";
-    loader.style.animation = "none";
     setTimeout(() => {
       loader.classList.add("hidden");
       loader.style.opacity = "1";
-      loader.style.animation = "";
-    }, 280);
-  }, 1000);
+    }, 260);
+  }, 400);
 }
 
-// back button with premium, fluid exit animation (award-winning macOS feel)
+// back button with premium apple card-lift EXIT animation
 backBtn.addEventListener("click", async () => {
-  // smooth loader entrance with glow
+  // ===== PHASE 1: APP VIEW EXIT (scale down + blur + fade) =====
+  appView.style.transition = "all 320ms cubic-bezier(0.25, 0.8, 0.3, 1)";
+  appView.style.opacity = "0";
+  appView.style.transform = "scale(0.92)";
+  appView.style.filter = "blur(4px)";
+  appView.style.pointerEvents = "none";
+
+  // Show loader
   loader.classList.remove("hidden");
   loader.style.opacity = "0";
-  loader.style.animation = "pageEnter 220ms cubic-bezier(0.16, 1, 0.3, 1), pulseGlow 2s ease-in-out infinite 220ms";
+  loader.style.animation = "none";
+  void loader.offsetWidth;
+  loader.style.animation = "pageEnter 280ms cubic-bezier(0.16, 1, 0.3, 1)";
   loader.style.opacity = "1";
 
-  // smooth app view exit with slide and scale down
-  appView.style.transition = "all 420ms cubic-bezier(0.2, 0.8, 0.2, 1)";
-  appView.style.opacity = "0";
-  appView.style.transform = "scale(0.95) translateX(32px)";
-  appView.style.filter = "blur(10px)";
-
+  // ===== PHASE 2: HOME SCREEN ENTER (scale up from blur) =====
   setTimeout(() => {
     appView.classList.add("hidden");
     appFrame.src = "";
-    
-    // reveal home with premium slide-in animation
     homeEl.classList.remove("hidden");
     
-    // Reset transition and animation
-    homeEl.style.transition = "none";
-    homeEl.style.animation = "none";
-    
-    // Clear all inline styles from home element
-    homeEl.style.opacity = "";
-    homeEl.style.pointerEvents = "";
-    homeEl.style.transform = "";
-    homeEl.style.filter = "";
-    
-    // Force reflow
-    void homeEl.offsetWidth;
-    
-    // Apply fresh premium animation after reflow
-    homeEl.style.animation = "slideInFromRight 480ms cubic-bezier(0.16, 1, 0.3, 1)";
+    // Reset home to initial blurred state
+    const glassWrapper = homeEl.querySelector(".glass-wrapper");
+    if (glassWrapper) {
+      glassWrapper.style.transition = "none";
+      glassWrapper.style.transform = "scale(0.96)";
+      glassWrapper.style.filter = "blur(6px)";
+      glassWrapper.style.opacity = "0.7";
+      
+      // Force reflow
+      void glassWrapper.offsetWidth;
+      
+      // Animate home back to normal (card-lift reverse)
+      glassWrapper.style.transition = "all 320ms cubic-bezier(0.16, 1, 0.3, 1)";
+      glassWrapper.style.transform = "scale(1)";
+      glassWrapper.style.filter = "blur(0px)";
+      glassWrapper.style.opacity = "1";
+    }
     homeEl.style.pointerEvents = "auto";
     
-    // Reset tile styles that were modified during open
+    // Reset tile styles
     document.querySelectorAll(".tile").forEach(tile => {
       tile.style.transition = "none";
       tile.style.transform = "";
@@ -304,22 +288,21 @@ backBtn.addEventListener("click", async () => {
       tile.style.boxShadow = "";
     });
     
-    // Reattach tile listeners after home is revealed
+    // Reattach tile listeners
     setTimeout(() => {
       attachTileListeners();
     }, 120);
-    
-    // smooth loader fade out
+  }, 320);
+
+  // Fade out loader
+  setTimeout(() => {
+    loader.style.transition = "opacity 260ms cubic-bezier(0.4, 0, 0.2, 1)";
+    loader.style.opacity = "0";
     setTimeout(() => {
-      loader.style.transition = "opacity 260ms cubic-bezier(0.4, 0, 0.2, 1)";
-      loader.style.opacity = "0";
-      loader.style.animation = "none";
-      setTimeout(() => {
-        loader.classList.add("hidden");
-        loader.style.opacity = "1";
-      }, 260);
-    }, 120);
-  }, 380);
+      loader.classList.add("hidden");
+      loader.style.opacity = "1";
+    }, 260);
+  }, 400);
 });
 
 // listen for auth or child-app messages

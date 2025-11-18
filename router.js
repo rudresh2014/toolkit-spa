@@ -1,19 +1,19 @@
-// router.js — Premium SPA controller with Apple-grade smooth transitions & micro-interactions
+// router.js — Apple macOS Sonoma Grade SPA with Buttery-Smooth GPU-Accelerated Transitions
 const homeEl = document.getElementById("home");
 const appView = document.getElementById("app-view");
 const appFrame = document.getElementById("app-frame");
 const backBtn = document.getElementById("backBtn");
 const loader = document.getElementById("loader");
 
-// Inject premium transition styles into document head
+// Inject premium ultra-smooth transition styles into document head
 const transitionStyles = `
   <style>
-    /* Page Transition Wrapper */
+    /* ========================= MASTER ANIMATIONS ========================= */
     @keyframes pageEnter {
       from {
         opacity: 0;
-        transform: scale(0.96) translateY(12px);
-        filter: blur(8px);
+        transform: scale(0.95) translateY(16px);
+        filter: blur(10px);
       }
       to {
         opacity: 1;
@@ -30,40 +30,23 @@ const transitionStyles = `
       }
       to {
         opacity: 0;
-        transform: scale(0.94) translateY(-12px);
-        filter: blur(8px);
-      }
-    }
-
-    @keyframes tileExpand {
-      from {
-        opacity: 1;
-        transform: scale(1);
-      }
-      to {
-        opacity: 0.95;
-        transform: scale(1.02);
+        transform: scale(0.93) translateY(-16px);
+        filter: blur(10px);
       }
     }
 
     @keyframes tilePress {
-      0% {
-        transform: scale(1);
-      }
-      50% {
-        transform: scale(0.97);
-      }
-      100% {
-        transform: scale(1);
-      }
+      0% { transform: scale(1); }
+      50% { transform: scale(0.96); }
+      100% { transform: scale(1); }
     }
 
     @keyframes ripple {
       0% {
-        box-shadow: 0 0 0 0 rgba(94, 252, 232, 0.7);
+        box-shadow: 0 0 0 0 rgba(94, 252, 232, 0.8);
       }
-      70% {
-        box-shadow: 0 0 0 12px rgba(94, 252, 232, 0);
+      60% {
+        box-shadow: 0 0 0 16px rgba(94, 252, 232, 0);
       }
       100% {
         box-shadow: 0 0 0 0 rgba(94, 252, 232, 0);
@@ -73,7 +56,7 @@ const transitionStyles = `
     @keyframes slideInFromRight {
       from {
         opacity: 0;
-        transform: translateX(40px);
+        transform: translateX(48px);
       }
       to {
         opacity: 1;
@@ -88,37 +71,34 @@ const transitionStyles = `
       }
       to {
         opacity: 0;
-        transform: translateX(-40px);
+        transform: translateX(-48px);
       }
     }
 
-    .app-view-wrapper {
-      animation: pageEnter 420ms cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: transform, opacity;
-    }
-
-    .app-view-exit {
-      animation: pageExit 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    @keyframes pulseGlow {
+      0%, 100% { 
+        box-shadow: 0 0 20px rgba(94, 252, 232, 0.3);
+      }
+      50% { 
+        box-shadow: 0 0 40px rgba(124, 120, 255, 0.4);
+      }
     }
 
     .tile:active {
-      animation: tilePress 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+      animation: tilePress 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .tile-ripple {
-      animation: ripple 600ms ease-out forwards;
+      animation: ripple 700ms cubic-bezier(0.25, 0.8, 0.3, 1) forwards;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      @keyframes pageEnter {
-        from { opacity: 0; } to { opacity: 1; }
-      }
-      @keyframes pageExit {
-        from { opacity: 1; } to { opacity: 0; }
-      }
-      @keyframes tileExpand { from { opacity: 1; } to { opacity: 1; } }
+      @keyframes pageEnter { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes pageExit { from { opacity: 1; } to { opacity: 0; } }
       @keyframes tilePress { 0%, 100% { transform: scale(1); } }
       @keyframes ripple { 0%, 100% { box-shadow: 0 0 0 0 rgba(94, 252, 232, 0); } }
+      @keyframes slideInFromRight { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes slideOutToLeft { from { opacity: 1; } to { opacity: 0; } }
     }
   </style>
 `;
@@ -144,13 +124,13 @@ function attachTileListeners() {
       e.preventDefault();
       e.stopPropagation();
       createRippleEffect(tile, e);
-      setTimeout(() => openApp(tile.dataset.app, tile), 60);
+      setTimeout(() => openApp(tile.dataset.app, tile), 50);
     };
 
     tile._mouseEnterHandler = () => {
-      tile.style.transform = "translateY(-4px)";
-      tile.style.transition = "all 200ms cubic-bezier(0.34, 1.56, 0.64, 1)";
-      tile.style.boxShadow = "0 20px 60px rgba(94, 252, 232, 0.2)";
+      tile.style.transform = "translateY(-6px)";
+      tile.style.transition = "all 280ms cubic-bezier(0.34, 1.56, 0.64, 1)";
+      tile.style.boxShadow = "0 28px 72px rgba(124, 120, 255, 0.25)";
     };
 
     tile._mouseLeaveHandler = () => {
@@ -168,34 +148,34 @@ function attachTileListeners() {
 // Initial attach on page load
 attachTileListeners();
 
-// Ripple micro-interaction
+// Premium ripple micro-interaction with glow effect
 function createRippleEffect(element, event) {
   const ripple = document.createElement('div');
   ripple.style.position = 'absolute';
   ripple.style.pointerEvents = 'none';
   ripple.style.inset = '0';
   ripple.style.borderRadius = 'inherit';
-  ripple.style.background = 'rgba(94, 252, 232, 0.3)';
-  ripple.style.animation = 'ripple 600ms ease-out forwards';
+  ripple.style.background = 'rgba(94, 252, 232, 0.35)';
+  ripple.style.animation = 'ripple 700ms cubic-bezier(0.25, 0.8, 0.3, 1) forwards';
   element.style.position = 'relative';
   element.style.overflow = 'hidden';
   element.appendChild(ripple);
   
-  setTimeout(() => ripple.remove(), 600);
+  setTimeout(() => ripple.remove(), 700);
 }
 
 let currentClone = null;
 
 async function openApp(name, tileEl) {
-  // show loader with smooth entrance
+  // show loader with smooth, pulsing entrance (macOS-grade polish)
   loader.classList.remove("hidden");
   loader.style.opacity = "0";
   loader.style.animation = "none";
   void loader.offsetWidth;
-  loader.style.animation = "pageEnter 280ms cubic-bezier(0.16, 1, 0.3, 1)";
+  loader.style.animation = "pageEnter 300ms cubic-bezier(0.16, 1, 0.3, 1), pulseGlow 2s ease-in-out infinite 300ms";
   loader.style.opacity = "1";
 
-  // clone tile for premium expanding animation
+  // clone tile for premium expanding shared-element animation
   const rect = tileEl.getBoundingClientRect();
   const clone = tileEl.cloneNode(true);
   clone.style.position = "fixed";
@@ -207,19 +187,19 @@ async function openApp(name, tileEl) {
   clone.style.zIndex = 9999;
   clone.style.pointerEvents = "none";
   clone.style.willChange = "transform, opacity";
-  clone.style.transition = "all 420ms cubic-bezier(0.16, 1, 0.3, 1)";
+  clone.style.transition = "all 480ms cubic-bezier(0.16, 1, 0.3, 1)";
   document.body.appendChild(clone);
   currentClone = clone;
 
-  // small tactile feedback on tile
-  tileEl.style.transform = "scale(0.96)";
+  // small tactile feedback on original tile (scale down)
+  tileEl.style.transform = "scale(0.94)";
   tileEl.style.transition = "transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1)";
-  tileEl.style.opacity = "0.8";
+  tileEl.style.opacity = "0.75";
 
   // force reflow for smooth animation
   void clone.offsetWidth;
 
-  // expand clone to cover screen with premium easing
+  // expand clone to cover screen with premium Sonoma-grade easing
   const targetW = window.innerWidth * 0.96;
   const targetH = window.innerHeight * 0.92;
   const targetLeft = (window.innerWidth - targetW) / 2;
@@ -229,36 +209,36 @@ async function openApp(name, tileEl) {
   clone.style.top = `${targetTop}px`;
   clone.style.width = `${targetW}px`;
   clone.style.height = `${targetH}px`;
-  clone.style.borderRadius = "16px";
-  clone.style.boxShadow = "0 50px 140px rgba(5, 8, 26, 0.85)";
-  clone.style.opacity = "0.98";
+  clone.style.borderRadius = "18px";
+  clone.style.boxShadow = "0 60px 180px rgba(0, 0, 0, 0.7)";
+  clone.style.opacity = "0.99";
 
-  // slide out/hide home with smooth transition
+  // slide out/hide home with fluid transition
   setTimeout(() => {
-    homeEl.style.animation = "slideOutToLeft 320ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+    homeEl.style.animation = "slideOutToLeft 380ms cubic-bezier(0.2, 0.8, 0.2, 1)";
     homeEl.style.pointerEvents = "none";
 
     setTimeout(() => {
       homeEl.classList.add("hidden");
       appView.classList.remove("hidden");
       appView.style.opacity = "0";
-      appView.style.transform = "scale(0.98)";
-      appView.style.filter = "blur(6px)";
+      appView.style.transform = "scale(0.97)";
+      appView.style.filter = "blur(8px)";
       
       // set iframe src
       appFrame.src = `/apps/${name}/index.html`;
       
       // animate appView fade and scale in with premium easing
       setTimeout(() => {
-        appView.style.transition = "all 420ms cubic-bezier(0.16, 1, 0.3, 1)";
+        appView.style.transition = "all 480ms cubic-bezier(0.16, 1, 0.3, 1)";
         appView.style.opacity = "1";
         appView.style.transform = "scale(1)";
         appView.style.filter = "blur(0)";
-      }, 50);
-    }, 240);
-  }, 280);
+      }, 60);
+    }, 260);
+  }, 300);
 
-  // remove clone after app loads / timeout
+  // remove clone after app loads and fade out loader
   setTimeout(() => {
     try { clone.remove(); } catch(e){}
     currentClone = null;
@@ -267,34 +247,36 @@ async function openApp(name, tileEl) {
     tileEl.style.transition = "";
     
     // smooth loader fade out
-    loader.style.transition = "opacity 200ms ease";
+    loader.style.transition = "opacity 280ms cubic-bezier(0.4, 0, 0.2, 1)";
     loader.style.opacity = "0";
+    loader.style.animation = "none";
     setTimeout(() => {
       loader.classList.add("hidden");
       loader.style.opacity = "1";
-    }, 200);
-  }, 900);
+      loader.style.animation = "";
+    }, 280);
+  }, 1000);
 }
 
-// back button with premium exit animation
+// back button with premium, fluid exit animation (award-winning macOS feel)
 backBtn.addEventListener("click", async () => {
-  // smooth loader entrance
+  // smooth loader entrance with glow
   loader.classList.remove("hidden");
   loader.style.opacity = "0";
-  loader.style.animation = "pageEnter 200ms cubic-bezier(0.16, 1, 0.3, 1)";
+  loader.style.animation = "pageEnter 220ms cubic-bezier(0.16, 1, 0.3, 1), pulseGlow 2s ease-in-out infinite 220ms";
   loader.style.opacity = "1";
 
-  // smooth app view exit with slide and scale
-  appView.style.transition = "all 380ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+  // smooth app view exit with slide and scale down
+  appView.style.transition = "all 420ms cubic-bezier(0.2, 0.8, 0.2, 1)";
   appView.style.opacity = "0";
-  appView.style.transform = "scale(0.97) translateX(20px)";
-  appView.style.filter = "blur(8px)";
+  appView.style.transform = "scale(0.95) translateX(32px)";
+  appView.style.filter = "blur(10px)";
 
   setTimeout(() => {
     appView.classList.add("hidden");
     appFrame.src = "";
     
-    // reveal home with premium enter animation
+    // reveal home with premium slide-in animation
     homeEl.classList.remove("hidden");
     
     // Reset transition and animation
@@ -310,8 +292,8 @@ backBtn.addEventListener("click", async () => {
     // Force reflow
     void homeEl.offsetWidth;
     
-    // Apply fresh animation after reflow
-    homeEl.style.animation = "slideInFromRight 420ms cubic-bezier(0.16, 1, 0.3, 1)";
+    // Apply fresh premium animation after reflow
+    homeEl.style.animation = "slideInFromRight 480ms cubic-bezier(0.16, 1, 0.3, 1)";
     homeEl.style.pointerEvents = "auto";
     
     // Reset tile styles that were modified during open
@@ -322,21 +304,22 @@ backBtn.addEventListener("click", async () => {
       tile.style.boxShadow = "";
     });
     
-    // Reattach tile listeners after home is revealed and styles cleared
+    // Reattach tile listeners after home is revealed
     setTimeout(() => {
       attachTileListeners();
-    }, 100);
+    }, 120);
     
     // smooth loader fade out
     setTimeout(() => {
-      loader.style.transition = "opacity 200ms ease";
+      loader.style.transition = "opacity 260ms cubic-bezier(0.4, 0, 0.2, 1)";
       loader.style.opacity = "0";
+      loader.style.animation = "none";
       setTimeout(() => {
         loader.classList.add("hidden");
         loader.style.opacity = "1";
-      }, 200);
-    }, 100);
-  }, 340);
+      }, 260);
+    }, 120);
+  }, 380);
 });
 
 // listen for auth or child-app messages

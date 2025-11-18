@@ -43,15 +43,21 @@
    refreshHomeUser();
    
    /* ============================
-      GREETING MESSAGE
+      GREETING MESSAGE (with Emoji & Time-based personalisation)
       ============================ */
    
    function updateGreeting() {
      const hour = new Date().getHours();
+     const greetings = [
+       { range: [0, 4], text: "🌙 Late Night", emoji: "🌙" },
+       { range: [5, 11], text: "🌅 Good Morning", emoji: "🌅" },
+       { range: [12, 16], text: "☀️ Good Afternoon", emoji: "☀️" },
+       { range: [17, 20], text: "🌆 Good Evening", emoji: "🌆" },
+       { range: [21, 23], text: "🌃 Night Owl Mode", emoji: "🌃" }
+     ];
    
-     if (hour < 12) greetingEl.textContent = "Good Morning";
-     else if (hour < 17) greetingEl.textContent = "Good Afternoon";
-     else greetingEl.textContent = "Good Evening";
+     const greeting = greetings.find(g => hour >= g.range[0] && hour <= g.range[1]) || greetings[2];
+     greetingEl.textContent = greeting.text;
    }
    
    /* ============================
@@ -147,14 +153,14 @@
          <div class="activity-item">
            <div class="activity-icon">📭</div>
            <div class="activity-content">
-             <div class="activity-text">No recent activity</div>
+             <div class="activity-text">No activity yet — start creating! 🚀</div>
            </div>
          </div>
        `;
        return;
      }
    
-     activityFeed.innerHTML = items.map(
+     activityFeed.innerHTML = items.slice(0, 8).map(
        a => `
          <div class="activity-item">
            <div class="activity-icon">${a.icon}</div>
@@ -210,7 +216,7 @@
      const last = localStorage.getItem("lastActivityDate");
    
      if (today !== last) {
-       addActivity("Welcome to your Toolkit", "✨");
+       addActivity("Welcome to Toolkit — let's build something great! 🎯", "🎯");
        localStorage.setItem("lastActivityDate", today);
      }
    })();

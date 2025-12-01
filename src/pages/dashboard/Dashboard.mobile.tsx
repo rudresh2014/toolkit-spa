@@ -9,6 +9,7 @@ import { MonthlyProjection } from "../../components/dashboard/MonthlyProjection"
 import { CompactCategoryList } from "../../components/dashboard/mobile/CompactCategoryList";
 import { CompactTransactions } from "../../components/dashboard/mobile/CompactTransactions";
 import { CompactProductivity } from "../../components/dashboard/mobile/CompactProductivity";
+import { MobileBottomNav } from "../../components/dashboard/mobile/MobileBottomNav";
 import { useWeather } from "../../hooks/useWeather";
 import { CloudSun, Trophy, Flame, Calendar, CheckCircle2 } from "lucide-react";
 
@@ -206,14 +207,7 @@ export default function MobileDashboard() {
                 )}
             </div>
 
-            {/* 2. Week Overview Chips */}
-            <WeekOverviewChips
-                tasksCompleted={stats.tasksCompletedWeek}
-                habitsCompleted={stats.habitsCompletedWeek}
-                weeklyExpenses={stats.weeklyExpenses}
-            />
-
-            {/* 3. Today at a Glance */}
+            {/* 2. Today at a Glance */}
             <TodayGlance
                 tasksCompleted={stats.tasksCompletedToday}
                 totalTasks={stats.totalTasksToday}
@@ -222,7 +216,14 @@ export default function MobileDashboard() {
                 todayExpenses={stats.todayExpenses}
             />
 
-            {/* 4. Habits Overview (2x2 Grid) */}
+            {/* Week Overview Chips - Temporarily commented out if causing issues, but keeping it for now */}
+            <WeekOverviewChips
+                tasksCompleted={stats.tasksCompletedWeek}
+                habitsCompleted={stats.habitsCompletedWeek}
+                weeklyExpenses={stats.weeklyExpenses}
+            />
+
+            {/* 3. Habits Overview (2x2 Grid) */}
             <div className="grid grid-cols-2 gap-3">
                 <Card className="bg-primary/5 border-primary/20">
                     <CardContent className="p-3 flex flex-col items-center justify-center text-center h-full">
@@ -254,10 +255,10 @@ export default function MobileDashboard() {
                 </Card>
             </div>
 
-            {/* 5. 7-Day Habit Heatmap */}
+            {/* 4. 7-Day Habit Heatmap */}
             <SevenDayHeatmap data={stats.sevenDayHabitData} />
 
-            {/* 6. Monthly Projection */}
+            {/* 5. Monthly Projection */}
             <MonthlyProjection
                 projected={stats.monthlyProjection.projected}
                 current={stats.monthlyProjection.current}
@@ -265,14 +266,17 @@ export default function MobileDashboard() {
                 trend={stats.monthlyProjection.trend}
             />
 
-            {/* 7. Productivity Score */}
+            {/* 6. Productivity Score */}
             <CompactProductivity score={stats.productivityScore} />
 
-            {/* 8. Category Breakdown */}
+            {/* 7. Category Breakdown */}
             <CompactCategoryList data={stats.categoryData} />
 
-            {/* 9. Transactions */}
+            {/* 8. Transactions */}
             <CompactTransactions transactions={stats.recentTransactions} />
+
+            {/* Bottom Nav */}
+            <MobileBottomNav />
         </div>
     );
 }

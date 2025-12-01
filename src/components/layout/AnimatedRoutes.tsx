@@ -6,6 +6,7 @@ import Login from "../../pages/Login";
 import Signup from "../../pages/Signup";
 import ForgotPassword from "../../pages/ForgotPassword";
 import Dashboard from "../../pages/dashboard/Dashboard";
+import ChooseExperience from "../../pages/ChooseExperience";
 import ExpenseTracker from "../../pages/ExpenseTracker";
 import TodoApp from "../../pages/TodoApp";
 import Habits from "../../pages/Habits";
@@ -46,7 +47,16 @@ export default function AnimatedRoutes() {
                     </PageTransition>
                 } />
 
+                <Route path="/choose" element={
+                    <ProtectedRoute>
+                        <PageTransition>
+                            <ChooseExperience />
+                        </PageTransition>
+                    </ProtectedRoute>
+                } />
+
                 <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+
                     <Route path="/" element={
                         <PageTransition>
                             <Dashboard />

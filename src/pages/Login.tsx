@@ -18,7 +18,7 @@ export default function Login() {
     const { session } = useAuth();
 
     if (session) {
-        navigate("/");
+        navigate("/choose");
         return null;
     }
 
@@ -36,7 +36,7 @@ export default function Login() {
             setError(error.message);
             setLoading(false);
         } else {
-            navigate("/");
+            navigate("/choose");
         }
     };
 

@@ -31,6 +31,25 @@ export default function TodoApp() {
 
     useEffect(() => {
         fetchTodos();
+
+        if (!user) return;
+
+        const channel = supabase
+            .channel('realtime todos')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'todos', filter: `user_id=eq.${user.id}` }, (payload) => {
+                if (payload.eventType === 'INSERT') {
+                    setTodos((prev) => [payload.new as Todo, ...prev]);
+                } else if (payload.eventType === 'DELETE') {
+                    setTodos((prev) => prev.filter((todo) => todo.id !== payload.old.id));
+                } else if (payload.eventType === 'UPDATE') {
+                    setTodos((prev) => prev.map((todo) => (todo.id === payload.new.id ? (payload.new as Todo) : todo)));
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, [user]);
 
     const fetchTodos = async () => {
@@ -56,7 +75,12 @@ export default function TodoApp() {
 
         const { data, error } = await supabase
             .from("todos")
-            .insert([{ user_id: user.id, text, priority, completed: false }])
+            .insert([{
+                user_id: user.id,
+                text,
+                priority,
+                completed: false
+            }])
             .select();
 
         if (!error && data) {
@@ -251,7 +275,7 @@ export default function TodoApp() {
                     {(["High", "Medium", "Low"] as const).map((p) => (
                         <div key={p} className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-lg">{p} Priority</h3>
+                                <h3 className="font-semibold text-lg">{p}</h3>
                                 <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
                                     {filteredTodos.filter(t => t.priority === p).length}
                                 </span>

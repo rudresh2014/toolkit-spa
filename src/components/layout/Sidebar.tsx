@@ -1,16 +1,27 @@
-import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Receipt, CheckSquare, LogOut } from "lucide-react";
+import { NavLink, useLocation } from "react-router-dom";
+import { LayoutDashboard, Receipt, CheckSquare, Target, LogOut } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../context/AuthContext";
+import { useReminder } from "../../context/ReminderContext";
 import { Button } from "../ui/button";
+import { useEffect } from "react";
 
 export function Sidebar() {
     const { signOut } = useAuth();
+    const { hasUnseenReminder, clearBadge } = useReminder();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.pathname === '/habits' && hasUnseenReminder) {
+            clearBadge();
+        }
+    }, [location.pathname, hasUnseenReminder, clearBadge]);
 
     const links = [
         { to: "/", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/expense", icon: Receipt, label: "Expenses" },
         { to: "/todo", icon: CheckSquare, label: "Todos" },
+        { to: "/habits", icon: Target, label: "Habits" },
     ];
 
     return (
@@ -35,6 +46,9 @@ export function Sidebar() {
                     >
                         <link.icon className="w-5 h-5" />
                         {link.label}
+                        {link.to === '/habits' && hasUnseenReminder && (
+                            <span className="ml-auto h-2 w-2 rounded-full bg-red-500" />
+                        )}
                     </NavLink>
                 ))}
             </nav>

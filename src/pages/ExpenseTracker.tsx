@@ -6,9 +6,9 @@ import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../components/ui/dialog";
-import { Plus, Trash2, Search, Loader2 } from "lucide-react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { Plus, Trash2, Search, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { FuturisticSelect, type Option } from "../components/ui/FuturisticSelect";
+import { CategoryHeatRing } from "../components/expenses/CategoryHeatRing";
 
 type Expense = {
     id: number;
@@ -129,6 +129,158 @@ export default function ExpenseTracker() {
         return acc;
     }, [] as { name: string, value: number }[]);
 
+    // Financial Insights Calculations
+    const calculateFinancialInsights = () => {
+        const now = new Date();
+        const thisMonth = now.getMonth();
+        const thisYear = now.getFullYear();
+
+        // Filter this month's expenses
+        const thisMonthExpenses = expenses.filter(e => {
+            const date = new Date(e.created_at);
+            return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+        });
+
+        // Most/Least Expensive Day
+        const dailyTotals = thisMonthExpenses.reduce((acc, e) => {
+            const date = new Date(e.created_at).toLocaleDateString();
+            acc[date] = (acc[date] || 0) + e.amount;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const days = Object.entries(dailyTotals);
+        const mostExpensiveDay = days.length > 0
+            ? days.reduce((max, curr) => curr[1] > max[1] ? curr : max)
+            : null;
+        const leastExpensiveDay = days.length > 0
+            ? days.reduce((min, curr) => curr[1] < min[1] ? curr : min)
+            : null;
+
+        // Top Category
+        const topCategory = categoryData.length > 0
+            ? categoryData.reduce((max, curr) => curr.value > max.value ? curr : max)
+            : null;
+
+        // Month Trend (compare with last month)
+        const lastMonth = thisMonth === 0 ? 11 : thisMonth - 1;
+        const lastMonthYear = thisMonth === 0 ? thisYear - 1 : thisYear;
+        const lastMonthExpenses = expenses.filter(e => {
+            const date = new Date(e.created_at);
+            return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
+        });
+
+        const thisMonthTotal = thisMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
+        const lastMonthTotal = lastMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
+
+        let trend: 'up' | 'down' | 'same' = 'same';
+        if (thisMonthTotal > lastMonthTotal) trend = 'up';
+        else if (thisMonthTotal < lastMonthTotal) trend = 'down';
+
+        // Average Daily Spend
+        const dayOfMonth = now.getDate();
+        const avgDailySpend = dayOfMonth > 0 ? thisMonthTotal / dayOfMonth : 0;
+
+        // Spending Pattern
+        const earlyMonth = thisMonthExpenses.filter(e => new Date(e.created_at).getDate() <= 10).reduce((sum, e) => sum + e.amount, 0);
+        const midMonth = thisMonthExpenses.filter(e => {
+            const day = new Date(e.created_at).getDate();
+            return day >= 11 && day <= 20;
+        }).reduce((sum, e) => sum + e.amount, 0);
+        const lateMonth = thisMonthExpenses.filter(e => new Date(e.created_at).getDate() >= 21).reduce((sum, e) => sum + e.amount, 0);
+
+        let spendingPattern = "Balanced Spender";
+        const maxSpend = Math.max(earlyMonth, midMonth, lateMonth);
+        if (maxSpend === earlyMonth && earlyMonth > 0) spendingPattern = "Early Month Spender";
+        else if (maxSpend === midMonth && midMonth > 0) spendingPattern = "Mid Month Spender";
+        else if (maxSpend === lateMonth && lateMonth > 0) spendingPattern = "Late Month Spender";
+
+        return {
+            mostExpensiveDay,
+            leastExpensiveDay,
+            topCategory,
+            trend,
+            avgDailySpend,
+            spendingPattern
+        };
+    };
+
+    // Spending Personality Calculations
+    const calculateSpendingPersonality = () => {
+        const personalities: string[] = [];
+        const now = new Date();
+        const thisMonth = now.getMonth();
+        const thisYear = now.getFullYear();
+
+        const thisMonthExpenses = expenses.filter(e => {
+            const date = new Date(e.created_at);
+            return date.getMonth() === thisMonth && date.getFullYear() === thisYear;
+        });
+
+        if (thisMonthExpenses.length === 0) return personalities;
+
+        // Weekend Spender
+        const weekendExpenses = thisMonthExpenses.filter(e => {
+            const day = new Date(e.created_at).getDay();
+            return day === 0 || day === 5 || day === 6; // Sun, Fri, Sat
+        });
+        if (weekendExpenses.length / thisMonthExpenses.length > 0.4) {
+            personalities.push("Weekend Spender");
+        }
+
+        // Foodie
+        const foodExpenses = thisMonthExpenses.filter(e => normalizeCategory(e.category) === "Food");
+        const foodTotal = foodExpenses.reduce((sum, e) => sum + e.amount, 0);
+        const monthTotal = thisMonthExpenses.reduce((sum, e) => sum + e.amount, 0);
+        if (foodTotal / monthTotal > 0.35) {
+            personalities.push("Foodie");
+        }
+
+        // Night Owl (9PM - 2AM)
+        const nightExpenses = thisMonthExpenses.filter(e => {
+            const hour = new Date(e.created_at).getHours();
+            return hour >= 21 || hour <= 2;
+        });
+        if (nightExpenses.length / thisMonthExpenses.length > 0.3) {
+            personalities.push("Night Owl");
+        }
+
+        // Minimalist
+        const uniqueCategories = new Set(thisMonthExpenses.map(e => normalizeCategory(e.category)));
+        if (uniqueCategories.size <= 3) {
+            personalities.push("Minimalist");
+        }
+
+        // Impulse Buyer
+        const smallExpenses = thisMonthExpenses.filter(e => e.amount < 200);
+        if (smallExpenses.length > 10) {
+            personalities.push("Impulse Buyer");
+        }
+
+        // Consistent Planner (low variance)
+        const dailyTotals = thisMonthExpenses.reduce((acc, e) => {
+            const date = new Date(e.created_at).toLocaleDateString();
+            acc[date] = (acc[date] || 0) + e.amount;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const amounts = Object.values(dailyTotals);
+        if (amounts.length > 1) {
+            const mean = amounts.reduce((sum, val) => sum + val, 0) / amounts.length;
+            const variance = amounts.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / amounts.length;
+            const stdDev = Math.sqrt(variance);
+            const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
+
+            if (coefficientOfVariation < 25) {
+                personalities.push("Consistent Planner");
+            }
+        }
+
+        return personalities;
+    };
+
+    const insights = calculateFinancialInsights();
+    const personalities = calculateSpendingPersonality();
+
     const categoryOptions: Option[] = [
         { value: "General", label: "General", color: "text-blue-400" },
         { value: "Food", label: "Food", color: "text-green-400" },
@@ -165,39 +317,99 @@ export default function ExpenseTracker() {
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium">Category Breakdown</CardTitle>
                     </CardHeader>
-                    <CardContent className="h-[200px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={categoryData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    stroke="none"
-                                >
-                                    {categoryData.map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <RechartsTooltip
-                                    formatter={(value) => `₹${Number(value).toLocaleString('en-IN')}`}
-                                    contentStyle={{ backgroundColor: 'transparent', border: 'none', boxShadow: 'none', color: 'white' }}
-                                    itemStyle={{ color: 'white' }}
-                                />
-                                <Legend
-                                    layout="vertical"
-                                    verticalAlign="middle"
-                                    align="right"
-                                    formatter={(value) => <span className="text-sm font-medium text-muted-foreground ml-2">{value}</span>}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
+                    <CardContent className="py-6">
+                        <CategoryHeatRing
+                            data={categoryData.map((item, index) => ({
+                                name: item.name,
+                                value: item.value,
+                                color: COLORS[index % COLORS.length]
+                            }))}
+                        />
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Financial Insights Card */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Financial Insights</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Most Expensive Day</span>
+                        <span className="text-base font-medium">
+                            {insights.mostExpensiveDay
+                                ? `${insights.mostExpensiveDay[0]} (₹${insights.mostExpensiveDay[1].toLocaleString('en-IN')})`
+                                : "N/A"}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Least Expensive Day</span>
+                        <span className="text-base font-medium">
+                            {insights.leastExpensiveDay
+                                ? `${insights.leastExpensiveDay[0]} (₹${insights.leastExpensiveDay[1].toLocaleString('en-IN')})`
+                                : "N/A"}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Top Category</span>
+                        <span className="text-base font-medium">
+                            {insights.topCategory
+                                ? `${insights.topCategory.name} (₹${insights.topCategory.value.toLocaleString('en-IN')})`
+                                : "N/A"}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Month Trend</span>
+                        <div className="flex items-center gap-2">
+                            {insights.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-500" />}
+                            {insights.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-500" />}
+                            {insights.trend === 'same' && <Minus className="h-4 w-4 text-muted-foreground" />}
+                            <span className="text-base font-medium">
+                                {insights.trend === 'up' ? 'Increasing' : insights.trend === 'down' ? 'Decreasing' : 'Stable'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Average Daily Spend</span>
+                        <span className="text-base font-medium">₹{insights.avgDailySpend.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Spending Pattern</span>
+                        <span className="text-base font-medium">{insights.spendingPattern}</span>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Spending Personality Card */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Spending Personality</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {personalities.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {personalities.map((personality, index) => (
+                                <span
+                                    key={index}
+                                    className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                                >
+                                    {personality}
+                                </span>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">
+                            Add more expenses to discover your spending personality
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader>

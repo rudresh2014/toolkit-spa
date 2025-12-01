@@ -5,9 +5,11 @@ import AppLayout from "./AppLayout";
 import Login from "../../pages/Login";
 import Signup from "../../pages/Signup";
 import ForgotPassword from "../../pages/ForgotPassword";
-import Dashboard from "../../pages/Dashboard";
+import Dashboard from "../../pages/dashboard/Dashboard";
 import ExpenseTracker from "../../pages/ExpenseTracker";
 import TodoApp from "../../pages/TodoApp";
+import Habits from "../../pages/Habits";
+import HabitDetail from "../../pages/habits/HabitDetail";
 import PageTransition from "./PageTransition";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -58,6 +60,16 @@ export default function AnimatedRoutes() {
                     <Route path="/todo" element={
                         <PageTransition>
                             <TodoApp />
+                        </PageTransition>
+                    } />
+                    <Route path="/habits" element={
+                        <PageTransition>
+                            <Habits />
+                        </PageTransition>
+                    } />
+                    <Route path="/habits/:id" element={
+                        <PageTransition>
+                            <HabitDetail />
                         </PageTransition>
                     } />
                 </Route>

@@ -5,12 +5,14 @@ import { supabase } from "../lib/supabase";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardFooter } from "../components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { AnimatedLogo } from "../components/ui/animated-logo";
 
 export default function Signup() {
+    const [displayName, setDisplayName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
@@ -23,12 +25,25 @@ export default function Signup() {
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Password Validation
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^_-])[A-Za-z\d@$!%*#?&^_-]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            setError("Password must be at least 6 characters and include a letter, a number, and a special character.");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
         const { error } = await supabase.auth.signUp({
             email,
             password,
+            options: {
+                data: {
+                    full_name: displayName,
+                },
+            },
         });
 
         if (error) {
@@ -109,6 +124,20 @@ export default function Signup() {
                                 <div className="grid gap-4">
                                     <div className="grid gap-2">
                                         <Input
+                                            id="displayName"
+                                            placeholder="Display Name"
+                                            type="text"
+                                            autoCapitalize="words"
+                                            autoComplete="name"
+                                            disabled={loading}
+                                            value={displayName}
+                                            onChange={(e) => setDisplayName(e.target.value)}
+                                            required
+                                            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-muted-foreground"
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Input
                                             id="email"
                                             placeholder="name@example.com"
                                             type="email"
@@ -122,25 +151,39 @@ export default function Signup() {
                                             className="bg-zinc-800 border-zinc-700 text-white placeholder:text-muted-foreground"
                                         />
                                     </div>
-                                    <div className="grid gap-2">
+                                    <div className="grid gap-2 relative">
                                         <Input
                                             id="password"
                                             placeholder="Password"
-                                            type="password"
+                                            type={showPassword ? "text" : "password"}
                                             autoCapitalize="none"
                                             autoComplete="new-password"
                                             disabled={loading}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
-                                            className="bg-zinc-800 border-zinc-700 text-white placeholder:text-muted-foreground"
+                                            className={`bg-zinc-800 border-zinc-700 text-white placeholder:text-muted-foreground transition-all duration-300 pr-10 ${password && /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^_-])[A-Za-z\d@$!%*#?&^_-]{6,}$/.test(password)
+                                                    ? "border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+                                                    : ""
+                                                }`}
                                         />
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground hover:text-white"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {showPassword ? (
+                                                <EyeOff className="h-4 w-4" />
+                                            ) : (
+                                                <Eye className="h-4 w-4" />
+                                            )}
+                                            <span className="sr-only">
+                                                {showPassword ? "Hide password" : "Show password"}
+                                            </span>
+                                        </Button>
                                     </div>
-                                    {error && (
-                                        <div className="text-sm text-red-500">
-                                            {error}
-                                        </div>
-                                    )}
                                     <Button disabled={loading} className="bg-white text-black hover:bg-zinc-200">
                                         {loading && (
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

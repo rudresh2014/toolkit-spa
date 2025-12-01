@@ -1,15 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ArrowUpRight, ArrowDownRight, Activity } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, Activity, Pencil } from "lucide-react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { Button } from "../ui/button";
 
-export function KPICard({ title, value, icon: Icon, trend, trendUp }: { title: string, value: string, icon: any, trend?: string, trendUp?: boolean }) {
+export function KPICard({ title, value, icon: Icon, trend, trendUp, onEdit }: { title: string, value: string, icon: any, trend?: string, trendUp?: boolean, onEdit?: () => void }) {
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                     {title}
                 </CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                    {onEdit && (
+                        <Button variant="ghost" size="icon" className="h-4 w-4" onClick={onEdit}>
+                            <Pencil className="h-3 w-3" />
+                        </Button>
+                    )}
+                    <Icon className="h-4 w-4 text-muted-foreground" />
+                </div>
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{value}</div>

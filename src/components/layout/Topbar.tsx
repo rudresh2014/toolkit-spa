@@ -1,13 +1,15 @@
-import { Moon, Sun, Clock } from "lucide-react";
+import { Moon, Sun, Clock, Cloud, CloudRain } from "lucide-react";
 import { useTheme } from "../theme-provider";
 import { Button } from "../ui/button";
 import { useAuth } from "../../context/AuthContext";
+import { useWeather } from "../../hooks/useWeather";
 import { useState, useEffect } from "react";
 
 export function Topbar() {
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
     const [currentTime, setCurrentTime] = useState(new Date());
+    const { data: weather, loading: weatherLoading } = useWeather();
 
     useEffect(() => {
         const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -15,6 +17,9 @@ export function Topbar() {
     }, []);
 
     const formatName = (email: string | undefined) => {
+        if (user?.user_metadata?.full_name) {
+            return user.user_metadata.full_name;
+        }
         if (!email) return "User";
         const namePart = email.split('@')[0];
         const nameWithoutNumbers = namePart.replace(/[0-9]/g, '');
@@ -42,6 +47,19 @@ export function Topbar() {
                 <p className="text-sm text-muted-foreground flex items-center gap-2 hidden md:flex">
                     <Clock className="h-4 w-4" />
                     {formattedDate} • {formattedTime}
+
+                    {!weatherLoading && weather && (
+                        <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                                {weather.weather[0].main === "Clear" && <Sun className="h-4 w-4" />}
+                                {weather.weather[0].main === "Clouds" && <Cloud className="h-4 w-4" />}
+                                {weather.weather[0].main === "Rain" && <CloudRain className="h-4 w-4" />}
+                                {!["Clear", "Clouds", "Rain"].includes(weather.weather[0].main) && <Cloud className="h-4 w-4" />}
+                                <span>{Math.round(weather.main.temp)}°C • {weather.weather[0].description}</span>
+                            </span>
+                        </>
+                    )}
                 </p>
             </div>
 
